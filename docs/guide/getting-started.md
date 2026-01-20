@@ -226,7 +226,7 @@ pnpm build
 
 - 查看各个[插件的详细文档](/plugins/ai-i18n)
 - 了解[配置选项](/guide/configuration)
-- 查看[最佳实践](/guide/best-practices)
+- 查看[技术架构](/guide/architecture)
 
 ## 常见问题
 
