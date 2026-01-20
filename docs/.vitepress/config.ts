@@ -4,6 +4,7 @@ export default defineConfig({
   title: "AI Vite Plugins",
   description: "一套强大的 AI 驱动的 Vite 插件集合",
   lang: "zh-CN",
+  base: "/vite-plugin-ai/", // GitHub Pages 部署路径
 
   head: [
     ["link", { rel: "icon", href: "/logo.svg" }],
