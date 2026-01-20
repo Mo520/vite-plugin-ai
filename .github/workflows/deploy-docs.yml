@@ -37,10 +37,14 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install
+        run: |
+          cd docs
+          pnpm install
 
       - name: Build docs
-        run: pnpm docs:build
+        run: |
+          cd docs
+          pnpm run docs:build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
