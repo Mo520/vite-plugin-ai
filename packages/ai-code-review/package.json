@@ -1,0 +1,63 @@
+{
+  "name": "vite-plugin-ai-code-review",
+  "version": "1.0.0",
+  "description": "AI-powered code review plugin for Vite - Automatically review code quality, security, and best practices",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "code-review",
+    "ai",
+    "openai",
+    "code-quality",
+    "security",
+    "linter",
+    "static-analysis"
+  ],
+  "author": "Haihui Mo <591348205@qq.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mo520/vite-plugin-ai.git",
+    "directory": "packages/ai-code-review"
+  },
+  "bugs": {
+    "url": "https://github.com/Mo520/vite-plugin-ai/issues"
+  },
+  "homepage": "https://your-docs-site.com/guide/ai-code-review",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "echo 'No tests yet'",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "vite": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
+    "vite-plugin-ai-shared": "workspace:*",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
