@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/Mo520/vite-plugin-ai/issues"
   },
-  "homepage": "https://your-docs-site.com/guide/ai-mock-generator",
+  "homepage": "https://mo520.github.io/vite-plugin-ai/plugins/ai-mock-generator",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

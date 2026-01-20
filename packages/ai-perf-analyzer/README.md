@@ -56,7 +56,7 @@ export default defineConfig({
 
 ## 📚 Documentation
 
-Full documentation: https://your-docs-site.com/guide/ai-perf-analyzer
+Full documentation: https://mo520.github.io/vite-plugin-ai/plugins/ai-perf-analyzer
 
 ## 📄 License
 

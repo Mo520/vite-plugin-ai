@@ -74,7 +74,7 @@ export default defineConfig({
 
 ## 📚 Documentation
 
-Full documentation: https://your-docs-site.com/guide/ai-mock-generator
+Full documentation: https://mo520.github.io/vite-plugin-ai/plugins/ai-mock-generator
 
 ## 📄 License
 

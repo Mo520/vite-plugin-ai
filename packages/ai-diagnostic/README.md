@@ -53,7 +53,7 @@ export default defineConfig({
 
 ## 📚 Documentation
 
-Full documentation: https://your-docs-site.com/guide/ai-diagnostic
+Full documentation: https://mo520.github.io/vite-plugin-ai/plugins/ai-diagnostic
 
 ## 📄 License
 

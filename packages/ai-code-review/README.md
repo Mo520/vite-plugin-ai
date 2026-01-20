@@ -59,7 +59,7 @@ export default defineConfig({
 
 ## 📚 Documentation
 
-Full documentation: https://your-docs-site.com/guide/ai-code-review
+Full documentation: https://mo520.github.io/vite-plugin-ai/plugins/ai-code-review
 
 ## 📄 License
 

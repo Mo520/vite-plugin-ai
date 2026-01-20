@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/Mo520/vite-plugin-ai/issues"
   },
-  "homepage": "https://your-docs-site.com/guide/ai-diagnostic",
+  "homepage": "https://mo520.github.io/vite-plugin-ai/plugins/ai-diagnostic",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
