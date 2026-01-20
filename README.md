@@ -1,6 +1,31 @@
 # AI Vite Plugins
 
-🚀 一套强大的 AI 驱动的 Vite 插件集合，帮助你提升开发效率。
+<p align="center">
+  <a href="https://mo520.github.io/vite-plugin-ai/">
+    <img src="https://img.shields.io/badge/docs-online-blue?style=flat-square" alt="Documentation">
+  </a>
+  <a href="https://github.com/Mo520/vite-plugin-ai/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
+  </a>
+  <a href="https://github.com/Mo520/vite-plugin-ai">
+    <img src="https://img.shields.io/github/stars/Mo520/vite-plugin-ai?style=flat-square" alt="GitHub Stars">
+  </a>
+  <a href="https://www.npmjs.com/search?q=vite-plugin-ai">
+    <img src="https://img.shields.io/badge/npm-vite--plugin--ai-red?style=flat-square" alt="npm">
+  </a>
+</p>
+
+<p align="center">
+  🚀 一套强大的 AI 驱动的 Vite 插件集合，帮助你提升开发效率
+</p>
+
+<p align="center">
+  <a href="https://mo520.github.io/vite-plugin-ai/">📚 在线文档</a> •
+  <a href="https://mo520.github.io/vite-plugin-ai/guide/getting-started">🚀 快速开始</a> •
+  <a href="https://github.com/Mo520/vite-plugin-ai/issues">💬 问题反馈</a>
+</p>
+
+---
 
 ## 📦 包列表
 
@@ -93,139 +118,34 @@ export default defineConfig({
 
 ## 📖 文档
 
-每个插件都有详细的文档：
+完整文档请访问：**[https://mo520.github.io/vite-plugin-ai/](https://mo520.github.io/vite-plugin-ai/)**
 
-- [AI i18n 插件文档](./packages/ai-i18n/README.md)
-- [AI Mock Generator 文档](./packages/ai-mock-generator/README.md)
-- [AI Code Review 文档](./packages/ai-code-review/README.md)
-- [AI Diagnostic 文档](./packages/ai-diagnostic/README.md)
-- [AI Perf Analyzer 文档](./packages/ai-perf-analyzer/README.md)
+每个插件的详细文档：
 
-## 🛠️ 开发
-
-### 环境要求
-
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
-
-### 克隆项目
-
-```bash
-git clone https://github.com/Mo520/vite-plugin-ai.git
-cd vite-plugin-ai
-```
-
-### 快速启动
-
-```bash
-# 运行快速启动脚本
-chmod +x quick-start.sh
-./quick-start.sh
-```
-
-或者手动执行：
-
-```bash
-# 1. 安装依赖
-pnpm install
-
-# 2. 构建所有包
-pnpm build
-
-# 3. 运行测试
-pnpm test
-```
-
-### 常用命令
-
-```bash
-# 构建所有包
-pnpm build
-
-# 开发模式（watch）
-pnpm dev
-
-# 运行测试
-pnpm test
-
-# 清理构建产物
-pnpm clean
-
-# 构建特定包
-pnpm --filter vite-plugin-ai-i18n build
-
-# 开发特定包
-pnpm --filter vite-plugin-ai-i18n dev
-```
-
-## 📝 发布流程
-
-### 1. 配置 Changesets
-
-```bash
-pnpm changeset init
-```
-
-### 2. 创建 Changeset
-
-```bash
-pnpm changeset
-```
-
-### 3. 更新版本
-
-```bash
-pnpm changeset version
-```
-
-### 4. 构建
-
-```bash
-pnpm build
-```
-
-### 5. 发布到 npm
-
-```bash
-# 登录 npm
-npm login
-
-# 发布
-pnpm changeset publish
-
-# 推送 tags
-git push --follow-tags
-```
-
-## 🏗️ 项目结构
-
-```
-ai-vite-plugins/
-├── packages/
-│   ├── shared/              # 共享工具库
-│   ├── ai-i18n/             # AI 国际化插件
-│   ├── ai-mock-generator/   # AI Mock 生成器
-│   ├── ai-code-review/      # AI 代码审查
-│   ├── ai-diagnostic/       # AI 智能诊断
-│   └── ai-perf-analyzer/    # AI 性能分析
-├── pnpm-workspace.yaml      # pnpm workspace 配置
-├── turbo.json               # Turborepo 配置
-├── package.json             # 根 package.json
-└── README.md                # 项目文档
-```
+- [AI 国际化插件](https://mo520.github.io/vite-plugin-ai/plugins/ai-i18n)
+- [AI Mock 生成器](https://mo520.github.io/vite-plugin-ai/plugins/ai-mock-generator)
+- [AI 代码审查](https://mo520.github.io/vite-plugin-ai/plugins/ai-code-review)
+- [AI 智能诊断](https://mo520.github.io/vite-plugin-ai/plugins/ai-diagnostic)
+- [AI 性能分析](https://mo520.github.io/vite-plugin-ai/plugins/ai-perf-analyzer)
 
 ## 🤝 贡献
 
-欢迎贡献！请查看 [贡献指南](./CONTRIBUTING.md)。
+欢迎贡献代码、报告问题或提出建议！
+
+查看[贡献指南](https://mo520.github.io/vite-plugin-ai/guide/introduction)了解更多。
 
 ## 📄 许可证
 
-[MIT](./LICENSE)
+[MIT](./LICENSE) © 2026 Haihui Mo
 
 ## 🔗 相关链接
 
+- [📚 完整文档](https://mo520.github.io/vite-plugin-ai/)
+- [🚀 快速开始](https://mo520.github.io/vite-plugin-ai/guide/getting-started)
+- [🏗️ 技术架构](https://mo520.github.io/vite-plugin-ai/guide/architecture)
+- [⚙️ 配置指南](https://mo520.github.io/vite-plugin-ai/guide/configuration)
 - [Vite 官方文档](https://vitejs.dev/)
-- [Turborepo 文档](https://turbo.build/repo/docs)
+- [LangChain 文档](https://js.langchain.com/)
 - [OpenAI API 文档](https://platform.openai.com/docs)
 
 ## 💬 支持
