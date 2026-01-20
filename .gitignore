@@ -62,5 +62,8 @@ coverage
 .temp
 .cache
 
+# 内部文档（不公开）
+MIGRATION.md
+
 # uni-app 相关（已移除，但保留以防万一）
 unpackage
