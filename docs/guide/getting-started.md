@@ -107,6 +107,8 @@ export default defineConfig({
       apiKey: process.env.OPENAI_API_KEY,
       apiUrl: process.env.OPENAI_API_URL,
       model: process.env.OPENAI_MODEL || "gpt-4",
+      temperature: 0.3, // 翻译灵活性（0-2，越高越自然）
+      maxTokens: 4000, // 最大 token 数（控制响应长度和成本）
 
       // 扫描配置
       include: ["src/**/*.vue", "src/**/*.ts"],
@@ -135,10 +137,17 @@ import { vitePluginAIMockGenerator } from "vite-plugin-ai-mock-generator";
 export default defineConfig({
   plugins: [
     vitePluginAIMockGenerator({
+      // API 配置
       apiKey: process.env.OPENAI_API_KEY,
+      model: "gpt-4",
+      temperature: 0.7, // 数据多样性（0-2，越高越多样）
+      maxTokens: 4000, // 最大 token 数
+
+      // 基础配置
       enabled: true,
       autoGenerate: true,
 
+      // 端点配置
       endpoints: [
         {
           path: "/api/users",
@@ -157,11 +166,13 @@ export default defineConfig({
         },
       ],
 
+      // 生成配置
       generation: {
         locale: "zh-CN",
         quality: "fast", // 'fast' | 'balanced' | 'high'
       },
 
+      // 存储配置
       storage: {
         dir: "mock-data",
         persist: true,

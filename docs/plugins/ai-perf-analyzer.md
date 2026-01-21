@@ -38,13 +38,23 @@ import { vitePluginAIPerfAnalyzer } from "vite-plugin-ai-perf-analyzer";
 export default defineConfig({
   plugins: [
     vitePluginAIPerfAnalyzer({
+      // API 配置
       apiKey: process.env.OPENAI_API_KEY,
+      model: "gpt-4",
+      temperature: 0.2, // 客观分析（0-2，越低越客观）
+      maxTokens: 4000, // 最大 token 数
+
+      // 基础配置
       enabled: true,
+
+      // 阈值配置
       threshold: {
         bundleSize: 500, // KB
         totalSize: 5, // MB
         chunkCount: 20,
       },
+
+      // 输出配置
       output: {
         console: true,
         html: true,
@@ -58,10 +68,19 @@ export default defineConfig({
 
 ### 基础配置
 
-| 选项      | 类型      | 默认值 | 说明           |
-| --------- | --------- | ------ | -------------- |
-| `enabled` | `boolean` | `true` | 是否启用       |
-| `apiKey`  | `string`  | -      | OpenAI API Key |
+| 选项      | 类型      | 默认值 | 说明     |
+| --------- | --------- | ------ | -------- |
+| `enabled` | `boolean` | `true` | 是否启用 |
+
+### API 配置
+
+| 选项          | 类型     | 默认值  | 说明                                |
+| ------------- | -------- | ------- | ----------------------------------- |
+| `apiKey`      | `string` | -       | OpenAI API Key                      |
+| `apiUrl`      | `string` | -       | OpenAI API URL（可选）              |
+| `model`       | `string` | `gpt-4` | 使用的 AI 模型                      |
+| `temperature` | `number` | `0.2`   | AI 创造性（0-2，越低越客观）        |
+| `maxTokens`   | `number` | `4000`  | 最大 token 数（控制响应长度和成本） |
 
 ### 阈值配置
 
@@ -247,6 +266,17 @@ jobs:
 npm run build
 git add ai-reports/.perf-history.json
 git commit -m "chore: update perf history"
+```
+
+### 4. 自定义 AI 参数
+
+```typescript
+vitePluginAIPerfAnalyzer({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: "gpt-4-turbo",
+  temperature: 0.2, // 客观分析（0-2，越低越客观）
+  maxTokens: 3000, // 控制响应长度
+});
 ```
 
 ## 最佳实践

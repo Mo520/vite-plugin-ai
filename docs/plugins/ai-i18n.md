@@ -38,7 +38,13 @@ import { vitePluginAII18n } from "vite-plugin-ai-i18n";
 export default defineConfig({
   plugins: [
     vitePluginAII18n({
+      // API 配置
       apiKey: process.env.OPENAI_API_KEY,
+      model: "gpt-4",
+      temperature: 0.3, // 翻译灵活性（0-2，越高越自然）
+      maxTokens: 4000, // 最大 token 数
+
+      // 功能配置
       localesDir: "src/locales",
       defaultLocale: "zh-CN",
       targetLocales: ["en-US"],
@@ -53,11 +59,13 @@ export default defineConfig({
 
 ### API 配置
 
-| 选项     | 类型     | 默认值                       | 说明           |
-| -------- | -------- | ---------------------------- | -------------- |
-| `apiKey` | `string` | `process.env.OPENAI_API_KEY` | OpenAI API Key |
-| `apiUrl` | `string` | `https://api.openai.com/v1`  | OpenAI API URL |
-| `model`  | `string` | `gpt-4`                      | 使用的模型     |
+| 选项          | 类型     | 默认值                       | 说明                                |
+| ------------- | -------- | ---------------------------- | ----------------------------------- |
+| `apiKey`      | `string` | `process.env.OPENAI_API_KEY` | OpenAI API Key                      |
+| `apiUrl`      | `string` | `https://api.openai.com/v1`  | OpenAI API URL                      |
+| `model`       | `string` | `gpt-4`                      | 使用的模型                          |
+| `temperature` | `number` | `0.3`                        | AI 创造性（0-2，翻译灵活性）        |
+| `maxTokens`   | `number` | `4000`                       | 最大 token 数（控制响应长度和成本） |
 
 ### 扫描配置
 
@@ -158,6 +166,17 @@ vitePluginAII18n({
 ```
 
 这样插件只会生成 `zh-CN.json`，你可以手动编辑其他语言文件。
+
+### 5. 自定义 AI 参数
+
+```typescript
+vitePluginAII18n({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: "gpt-4-turbo",
+  temperature: 0.3, // 翻译灵活性（0-2，越高越自然）
+  maxTokens: 4000, // 控制响应长度
+});
+```
 
 ## 工作原理
 

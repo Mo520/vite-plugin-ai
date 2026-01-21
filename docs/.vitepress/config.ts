@@ -34,6 +34,10 @@ export default defineConfig({
             { text: "技术架构", link: "/guide/architecture" },
           ],
         },
+        {
+          text: "开发指南",
+          items: [{ text: "Changeset 工作流程", link: "/changeset-workflow" }],
+        },
       ],
       "/plugins/": [
         {

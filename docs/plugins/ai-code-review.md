@@ -39,7 +39,13 @@ import { vitePluginAICodeReview } from "vite-plugin-ai-code-review";
 export default defineConfig({
   plugins: [
     vitePluginAICodeReview({
+      // API 配置
       apiKey: process.env.OPENAI_API_KEY,
+      model: "gpt-4",
+      temperature: 0.2, // 一致的审查标准（0-2，越低越一致）
+      maxTokens: 4000, // 最大 token 数
+
+      // 审查配置
       mode: "changed", // 只审查变更的文件
       level: "standard",
       rules: {
@@ -47,6 +53,8 @@ export default defineConfig({
         performance: "warn",
         style: "info",
       },
+
+      // 输出配置
       output: {
         console: true,
         html: true,
@@ -73,6 +81,16 @@ export default defineConfig({
 | `basic`    | 基础检查（快速） |
 | `standard` | 标准检查（推荐） |
 | `strict`   | 严格检查（详细） |
+
+### API 配置
+
+| 选项          | 类型     | 默认值  | 说明                                |
+| ------------- | -------- | ------- | ----------------------------------- |
+| `apiKey`      | `string` | -       | OpenAI API Key                      |
+| `apiUrl`      | `string` | -       | OpenAI API URL（可选）              |
+| `model`       | `string` | `gpt-4` | 使用的 AI 模型                      |
+| `temperature` | `number` | `0.2`   | AI 创造性（0-2，越低越一致）        |
+| `maxTokens`   | `number` | `4000`  | 最大 token 数（控制响应长度和成本） |
 
 ### 规则配置
 
@@ -172,6 +190,17 @@ jobs:
 vitePluginAICodeReview({
   include: ["src/**/*.ts", "src/**/*.vue"],
   exclude: ["src/**/*.spec.ts", "src/test/**"],
+});
+```
+
+### 4. 自定义 AI 参数
+
+```typescript
+vitePluginAICodeReview({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: "gpt-4-turbo",
+  temperature: 0.2, // 一致的审查标准（0-2，越低越一致）
+  maxTokens: 3000, // 控制响应长度
 });
 ```
 

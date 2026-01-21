@@ -40,9 +40,17 @@ import { vitePluginAIMockGenerator } from "vite-plugin-ai-mock-generator";
 export default defineConfig({
   plugins: [
     vitePluginAIMockGenerator({
+      // API 配置
       apiKey: process.env.OPENAI_API_KEY,
+      model: "gpt-4",
+      temperature: 0.7, // 数据多样性（0-2，越高越多样）
+      maxTokens: 4000, // 最大 token 数
+
+      // 基础配置
       enabled: true,
       autoGenerate: true,
+
+      // 端点配置
       endpoints: [
         {
           path: "/api/users",
@@ -68,11 +76,13 @@ export default defineConfig({
 
 ### API 配置
 
-| 选项     | 类型     | 默认值                       | 说明           |
-| -------- | -------- | ---------------------------- | -------------- |
-| `apiKey` | `string` | `process.env.OPENAI_API_KEY` | OpenAI API Key |
-| `apiUrl` | `string` | `https://api.openai.com/v1`  | OpenAI API URL |
-| `model`  | `string` | `gpt-4`                      | 使用的模型     |
+| 选项          | 类型     | 默认值                       | 说明                                |
+| ------------- | -------- | ---------------------------- | ----------------------------------- |
+| `apiKey`      | `string` | `process.env.OPENAI_API_KEY` | OpenAI API Key                      |
+| `apiUrl`      | `string` | `https://api.openai.com/v1`  | OpenAI API URL                      |
+| `model`       | `string` | `gpt-4`                      | 使用的模型                          |
+| `temperature` | `number` | `0.7`                        | AI 创造性（0-2，越高数据越多样）    |
+| `maxTokens`   | `number` | `4000`                       | 最大 token 数（控制响应长度和成本） |
 
 ### 基础配置
 
@@ -229,6 +239,20 @@ export default defineConfig({
       endpoints: mockEndpoints,
     }),
   ],
+});
+```
+
+### 6. 自定义 AI 参数
+
+```typescript
+vitePluginAIMockGenerator({
+  apiKey: process.env.OPENAI_API_KEY,
+  model: "gpt-4-turbo",
+  temperature: 0.7, // 数据多样性（0-2，越高越多样）
+  maxTokens: 4000, // 控制响应长度
+  generation: {
+    quality: "high", // 高质量数据生成
+  },
 });
 ```
 

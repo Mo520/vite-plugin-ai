@@ -77,7 +77,13 @@ import { vitePluginAII18n } from "vite-plugin-ai-i18n";
 export default defineConfig({
   plugins: [
     vitePluginAII18n({
+      // API 配置
       apiKey: process.env.OPENAI_API_KEY,
+      model: "gpt-4",
+      temperature: 0.3, // 翻译灵活性（0-2）
+      maxTokens: 4000, // 最大 token 数
+
+      // 功能配置
       localesDir: "src/locales",
       defaultLocale: "zh-CN",
       targetLocales: ["en-US", "ja-JP"],
