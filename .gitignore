@@ -51,6 +51,15 @@ ai-reports/
 mock-data/
 !mock-data/.gitkeep
 
+# 国际化文件（自动生成）
+src/locales/
+!src/locales/.gitkeep
+
+# Vue 编译产物（开发时生成）
+src/**/*.js
+src/**/*.js.map
+!src/**/*.config.js
+
 # Turborepo 缓存
 .turbo
 

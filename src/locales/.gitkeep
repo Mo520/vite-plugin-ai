@@ -1,0 +1,2 @@
+# 此文件用于保留 locales 目录结构
+# 实际的语言文件（*.json）由 vite-plugin-ai-i18n 自动生成，不提交到 Git
