@@ -1,17 +1,14 @@
 {
   "name": "vite-plugin-ai-i18n",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "AI-powered internationalization plugin for Vite - Automatically scan, translate and manage i18n files",
   "keywords": [
+    "vite-plugin-ai-i18n",
+    "vite-plugin-ai",
     "vite",
-    "vite-plugin",
-    "i18n",
-    "internationalization",
     "ai",
-    "openai",
-    "translation",
-    "localization",
-    "vue-i18n"
+    "i18n",
+    "translation"
   ],
   "author": "Haihui Mo <591348205@qq.com>",
   "license": "MIT",
@@ -45,11 +42,13 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "vite": "^4.0.0 || ^5.0.0"
+    "vite": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
-    "vite-plugin-ai-shared": "workspace:*",
-    "picocolors": "^1.1.1"
+    "vite-plugin-ai-shared": "^1.0.2",
+    "picocolors": "^1.1.1",
+    "@langchain/core": "^0.3.0",
+    "@langchain/openai": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

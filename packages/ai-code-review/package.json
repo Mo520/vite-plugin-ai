@@ -1,17 +1,14 @@
 {
   "name": "vite-plugin-ai-code-review",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "AI-powered code review plugin for Vite - Automatically review code quality, security, and best practices",
   "keywords": [
+    "vite-plugin-ai-code-review",
+    "vite-plugin-ai",
     "vite",
-    "vite-plugin",
-    "code-review",
     "ai",
-    "openai",
-    "code-quality",
-    "security",
-    "linter",
-    "static-analysis"
+    "code-review",
+    "code-quality"
   ],
   "author": "Haihui Mo <591348205@qq.com>",
   "license": "MIT",
@@ -45,11 +42,13 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "vite": "^4.0.0 || ^5.0.0"
+    "vite": "^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
-    "vite-plugin-ai-shared": "workspace:*",
-    "picocolors": "^1.1.1"
+    "vite-plugin-ai-shared": "^1.0.2",
+    "picocolors": "^1.1.1",
+    "@langchain/core": "^0.3.0",
+    "@langchain/openai": "^0.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
