@@ -9,6 +9,16 @@ const router = createRouter({
       component: () => import("@/pages/index/index.vue"),
     },
     {
+      path: "/diagnostic-test",
+      name: "DiagnosticTest",
+      component: () => import("@/pages/index/test-diagnostic.vue"),
+    },
+    {
+      path: "/build-error-test",
+      name: "BuildErrorTest",
+      component: () => import("@/pages/index/test-build-error.vue"),
+    },
+    {
       path: "/hosd",
       name: "PerfTest",
       component: () => import("@/pages/hosd/index.vue"),
