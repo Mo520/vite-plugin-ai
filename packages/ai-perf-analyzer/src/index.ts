@@ -18,6 +18,8 @@ export interface PerfAnalyzerOptions {
   apiKey?: string;
   apiUrl?: string;
   model?: string;
+  temperature?: number;
+  maxTokens?: number;
   // 分析配置
   enabled?: boolean;
   threshold?: {
@@ -40,6 +42,8 @@ export function vitePluginAIPerfAnalyzer(
     apiKey = process.env.OPENAI_API_KEY || "",
     apiUrl = process.env.OPENAI_API_URL || "https://api.openai.com/v1",
     model = process.env.OPENAI_MODEL || "gpt-4",
+    temperature = 0.2,
+    maxTokens = 4000,
     enabled = true,
     threshold = {
       bundleSize: 500, // 500KB
@@ -53,7 +57,14 @@ export function vitePluginAIPerfAnalyzer(
     },
   } = options;
 
-  const analyzer = new PerfAnalyzer({ apiKey, apiUrl, model, threshold });
+  const analyzer = new PerfAnalyzer({
+    apiKey,
+    apiUrl,
+    model,
+    threshold,
+    temperature,
+    maxTokens,
+  });
   const reporter = new PerfReporter();
 
   let analysisResult: AnalysisResult | null = null;
@@ -97,3 +108,6 @@ export function vitePluginAIPerfAnalyzer(
     },
   };
 }
+
+// 默认导出
+export default vitePluginAIPerfAnalyzer;

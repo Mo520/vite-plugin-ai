@@ -10,6 +10,8 @@ export interface TranslatorOptions {
   apiKey: string;
   apiUrl: string;
   model: string;
+  temperature?: number;
+  maxTokens?: number;
 }
 
 export class I18nTranslator {
@@ -24,8 +26,8 @@ export class I18nTranslator {
         openAIApiKey: options.apiKey,
         configuration: { baseURL: options.apiUrl },
         modelName: options.model,
-        temperature: 0.3,
-        maxTokens: 4000,
+        temperature: options.temperature ?? 0.3,
+        maxTokens: options.maxTokens ?? 4000,
       });
     }
   }

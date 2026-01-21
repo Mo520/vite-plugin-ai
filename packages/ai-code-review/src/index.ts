@@ -18,6 +18,8 @@ export interface CodeReviewOptions {
   apiKey?: string;
   apiUrl?: string;
   model?: string;
+  temperature?: number;
+  maxTokens?: number;
 
   // 审查模式
   mode?: "changed" | "all" | "manual";
@@ -57,12 +59,14 @@ export interface CodeReviewOptions {
 }
 
 export function vitePluginAICodeReview(
-  options: CodeReviewOptions = {}
+  options: CodeReviewOptions = {},
 ): Plugin {
   const {
     apiKey = process.env.OPENAI_API_KEY || "",
     apiUrl = process.env.OPENAI_API_URL || "https://api.openai.com/v1",
     model = "gpt-4",
+    temperature = 0.2,
+    maxTokens = 4000,
     mode = "changed",
     files = [],
     level = "standard",
@@ -97,6 +101,8 @@ export function vitePluginAICodeReview(
     apiKey,
     apiUrl,
     model,
+    temperature,
+    maxTokens,
     level,
     rules,
     cache,
@@ -139,7 +145,7 @@ export function vitePluginAICodeReview(
 
       // 过滤文件
       filesToReview = filesToReview.filter((file) =>
-        shouldReview(file, include, exclude)
+        shouldReview(file, include, exclude),
       );
 
       if (mode !== "all" && filesToReview.length > 0) {
@@ -168,7 +174,7 @@ export function vitePluginAICodeReview(
                     console.log(
                       `${icon} [${issue.category}] ${issue.file}:${
                         issue.line || "?"
-                      }`
+                      }`,
                     );
                     console.log(`   ${issue.message}`);
                     if (issue.suggestion) {
@@ -228,7 +234,9 @@ export function vitePluginAICodeReview(
             issues.forEach((issue) => {
               const icon = getSeverityIcon(issue.severity);
               console.log(
-                `${icon} [${issue.category}] ${issue.file}:${issue.line || "?"}`
+                `${icon} [${issue.category}] ${issue.file}:${
+                  issue.line || "?"
+                }`,
               );
               console.log(`   ${issue.message}`);
               if (issue.suggestion) {
@@ -271,7 +279,7 @@ export function vitePluginAICodeReview(
 function shouldReview(
   filePath: string,
   include: string[],
-  exclude: string[]
+  exclude: string[],
 ): boolean {
   // 检查排除规则
   for (const pattern of exclude) {
@@ -326,3 +334,6 @@ function getSeverityIcon(severity: string): string {
 
 // 导出类
 export { CodeReviewer, GitUtils, Reporter };
+
+// 默认导出
+export default vitePluginAICodeReview;

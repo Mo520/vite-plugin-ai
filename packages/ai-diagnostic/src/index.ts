@@ -7,12 +7,13 @@
  * - 自动修复代码
  */
 
-import type { Plugin } from "vite";
+import type { Plugin, ResolvedConfig } from "vite";
 import fs from "fs";
 import path from "path";
 import { AIErrorDiagnostic } from "./diagnostic";
 import { extractSourceFile } from "vite-plugin-ai-shared";
 import { DiagnosticReporter, type DiagnosticReport } from "./reporter";
+import { glob } from "glob";
 
 export interface AIPluginOptions {
   apiKey?: string;
@@ -20,6 +21,8 @@ export interface AIPluginOptions {
   autoFix?: boolean;
   model?: string;
   maxRetries?: number;
+  temperature?: number;
+  maxTokens?: number;
   output?: {
     console?: boolean;
     html?: boolean;
@@ -35,6 +38,8 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
     autoFix = false,
     model = "gpt-4",
     maxRetries = 3,
+    temperature = 0.1,
+    maxTokens = 4000,
     output = {
       console: true,
       html: true,
@@ -48,11 +53,15 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
     apiUrl,
     model,
     maxRetries,
+    temperature,
+    maxTokens,
   });
 
   let buildErrors: any[] = [];
   let lastTransformFile: string | null = null;
   let processedErrors = new Set<string>(); // 记录已处理的错误
+  let config: ResolvedConfig;
+  let diagnosticResults: DiagnosticReport[] = []; // 收集所有诊断结果
 
   // 处理错误的函数
   async function processError(error: any) {
@@ -101,7 +110,7 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
         console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
       }
 
-      // 生成报告
+      // 生成报告对象
       const report: DiagnosticReport = {
         timestamp: new Date().toLocaleString("zh-CN"),
         error: {
@@ -116,7 +125,8 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
         fixedFilePath: result.filePath,
       };
 
-      await DiagnosticReporter.generate(report, output);
+      // 收集诊断结果，稍后统一生成报告
+      diagnosticResults.push(report);
     } catch (err: any) {
       console.error("❌ AI 诊断失败：", err.message);
     }
@@ -128,7 +138,8 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
     // 确保插件在其他插件之后执行，以捕获更多错误
     enforce: "post",
 
-    configResolved(config) {
+    configResolved(resolvedConfig) {
+      config = resolvedConfig;
       console.log("\n🤖 AI 诊断助手已启动...");
       console.log(`⚙️  自动修复: ${autoFix ? "✅ 已启用" : "❌ 未启用"}`);
       console.log(`📝 根目录: ${config.root}`);
@@ -137,10 +148,156 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
       );
     },
 
-    buildStart() {
+    async buildStart() {
       buildErrors = [];
       processedErrors.clear();
-      console.log("🔍 [调试] buildStart 已执行");
+      diagnosticResults = []; // 清空诊断结果
+      console.log("🔍 开始扫描源文件...");
+
+      // 扫描 src 目录下的所有源文件
+      const srcDir = path.join(config.root, "src");
+      if (!fs.existsSync(srcDir)) {
+        console.log("⚠️  src 目录不存在，跳过文件扫描");
+        return;
+      }
+
+      try {
+        // 使用 glob 查找所有源文件
+        const files = await glob("**/*.{vue,ts,tsx,js,jsx}", {
+          cwd: srcDir,
+          absolute: true,
+          ignore: ["**/node_modules/**", "**/*.d.ts"],
+        });
+
+        console.log(`📂 找到 ${files.length} 个源文件`);
+
+        // 检查每个文件的语法
+        for (const file of files) {
+          try {
+            const code = fs.readFileSync(file, "utf-8");
+
+            // 基本语法检查
+            if (file.endsWith(".vue")) {
+              // 检查 Vue 文件的基本结构
+              if (!code.includes("<template>") && !code.includes("<script>")) {
+                buildErrors.push({
+                  type: "syntax",
+                  message: "Vue 文件缺少 <template> 或 <script> 标签",
+                  file: file,
+                  code: code,
+                });
+              }
+
+              // 检查未闭合的标签
+              const templateMatch = code.match(/<template[^>]*>/);
+              if (templateMatch && !code.includes("</template>")) {
+                buildErrors.push({
+                  type: "syntax",
+                  message: "Vue 文件中 <template> 标签未闭合",
+                  file: file,
+                  code: code,
+                });
+              }
+
+              const scriptMatch = code.match(/<script[^>]*>/);
+              if (scriptMatch && !code.includes("</script>")) {
+                buildErrors.push({
+                  type: "syntax",
+                  message: "Vue 文件中 <script> 标签未闭合",
+                  file: file,
+                  code: code,
+                });
+              }
+            }
+
+            // 检查 JavaScript/TypeScript 语法错误（简单检查）
+            if (
+              file.endsWith(".ts") ||
+              file.endsWith(".tsx") ||
+              file.endsWith(".js") ||
+              file.endsWith(".jsx")
+            ) {
+              // 检查括号匹配
+              const openBraces = (code.match(/\{/g) || []).length;
+              const closeBraces = (code.match(/\}/g) || []).length;
+              if (openBraces !== closeBraces) {
+                buildErrors.push({
+                  type: "syntax",
+                  message: `括号不匹配：{ 有 ${openBraces} 个，} 有 ${closeBraces} 个`,
+                  file: file,
+                  code: code,
+                });
+              }
+
+              const openParens = (code.match(/\(/g) || []).length;
+              const closeParens = (code.match(/\)/g) || []).length;
+              if (openParens !== closeParens) {
+                buildErrors.push({
+                  type: "syntax",
+                  message: `圆括号不匹配：( 有 ${openParens} 个，) 有 ${closeParens} 个`,
+                  file: file,
+                  code: code,
+                });
+              }
+            }
+
+            // 检查导入语句中的不存在模块（这个会在后续构建中被捕获）
+            const importRegex = /import\s+.*?\s+from\s+['"](.+?)['"]/g;
+            let match;
+            while ((match = importRegex.exec(code)) !== null) {
+              const importPath = match[1];
+
+              // 跳过 node_modules 和别名导入
+              if (importPath.startsWith(".") || importPath.startsWith("/")) {
+                const resolvedPath = path.resolve(
+                  path.dirname(file),
+                  importPath,
+                );
+                const extensions = [".ts", ".tsx", ".js", ".jsx", ".vue", ""];
+
+                let exists = false;
+                for (const ext of extensions) {
+                  const fullPath = resolvedPath + ext;
+                  if (fs.existsSync(fullPath)) {
+                    exists = true;
+                    break;
+                  }
+                  // 检查是否为目录，且包含 index 文件
+                  if (
+                    fs.existsSync(resolvedPath) &&
+                    fs.statSync(resolvedPath).isDirectory()
+                  ) {
+                    const indexPath = path.join(resolvedPath, "index" + ext);
+                    if (fs.existsSync(indexPath)) {
+                      exists = true;
+                      break;
+                    }
+                  }
+                }
+
+                if (!exists) {
+                  buildErrors.push({
+                    type: "module",
+                    message: `找不到模块: ${importPath}`,
+                    file: file,
+                    code: code,
+                  });
+                }
+              }
+            }
+          } catch (err: any) {
+            console.warn(`⚠️  无法读取文件 ${file}: ${err.message}`);
+          }
+        }
+
+        if (buildErrors.length > 0) {
+          console.log(`⚠️  扫描发现 ${buildErrors.length} 个潜在问题`);
+        } else {
+          console.log("✅ 文件扫描完成，未发现明显问题");
+        }
+      } catch (err: any) {
+        console.error(`❌ 文件扫描失败: ${err.message}`);
+      }
     },
 
     // 解析模块时捕获错误
@@ -259,6 +416,17 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
         for (const error of buildErrors) {
           await processError(error);
         }
+
+        // 统一生成合并报告
+        if (diagnosticResults.length > 0) {
+          console.log(
+            `\n📊 正在生成合并诊断报告 (${diagnosticResults.length} 个错误)...\n`,
+          );
+          await DiagnosticReporter.generateMultiReport(
+            diagnosticResults,
+            output,
+          );
+        }
       } else {
         console.log("✨ 构建完成，未检测到错误\n");
       }
@@ -283,3 +451,6 @@ export function vitePluginAIDiagnostic(options: AIPluginOptions = {}): Plugin {
     },
   };
 }
+
+// 默认导出
+export default vitePluginAIDiagnostic;

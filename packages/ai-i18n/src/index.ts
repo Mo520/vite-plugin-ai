@@ -20,6 +20,8 @@ export interface I18nPluginOptions {
   apiKey?: string;
   apiUrl?: string;
   model?: string;
+  temperature?: number;
+  maxTokens?: number;
   // 扫描配置
   include?: string[];
   exclude?: string[];
@@ -37,6 +39,8 @@ export function vitePluginAII18n(options: I18nPluginOptions = {}): Plugin {
     apiKey = process.env.OPENAI_API_KEY || "",
     apiUrl = process.env.OPENAI_API_URL || "https://api.openai.com/v1",
     model = "gpt-4",
+    temperature = 0.3,
+    maxTokens = 4000,
     include = ["src/**/*.vue", "src/**/*.ts"],
     exclude = ["node_modules/**", "dist/**"],
     localesDir = "src/locales",
@@ -47,7 +51,13 @@ export function vitePluginAII18n(options: I18nPluginOptions = {}): Plugin {
   } = options;
 
   const scanner = new I18nScanner({ include, exclude });
-  const translator = new I18nTranslator({ apiKey, apiUrl, model });
+  const translator = new I18nTranslator({
+    apiKey,
+    apiUrl,
+    model,
+    temperature,
+    maxTokens,
+  });
   const generator = new I18nGenerator({ localesDir, defaultLocale });
 
   let scannedTexts: Map<string, string[]> = new Map();
@@ -177,3 +187,6 @@ export function vitePluginAII18n(options: I18nPluginOptions = {}): Plugin {
     },
   };
 }
+
+// 默认导出
+export default vitePluginAII18n;

@@ -2,21 +2,33 @@
  * AI Mock Generator - 数据生成器
  */
 
+import { ChatOpenAI } from "@langchain/openai";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import type {
   TypeDefinition,
   GenerationContext,
   PropertyDefinition,
-} from './types';
+} from "./types";
 
 export class MockDataGenerator {
-  private apiKey: string;
-  private apiUrl: string;
-  private model: string;
+  private llm: ChatOpenAI;
 
-  constructor(options: { apiKey: string; apiUrl: string; model: string }) {
-    this.apiKey = options.apiKey;
-    this.apiUrl = options.apiUrl;
-    this.model = options.model;
+  constructor(options: {
+    apiKey: string;
+    apiUrl: string;
+    model: string;
+    temperature?: number;
+    maxTokens?: number;
+  }) {
+    this.llm = new ChatOpenAI({
+      openAIApiKey: options.apiKey,
+      configuration: {
+        baseURL: options.apiUrl,
+      },
+      modelName: options.model,
+      temperature: options.temperature ?? 0.7,
+      maxTokens: options.maxTokens ?? 4000,
+    });
   }
 
   /**
@@ -42,19 +54,25 @@ export class MockDataGenerator {
     type: TypeDefinition,
     count: number,
     locale: string,
-    quality: string
+    quality: string,
   ): string {
     const properties = type.properties
       .map((p) => this.formatProperty(p))
-      .join('\n');
+      .join("\n");
 
     return `
 你是一个专业的 Mock 数据生成器。请根据以下类型定义生成真实、合理的测试数据。
 
 类型名称: ${type.name}
-数据语言: ${locale === 'zh-CN' ? '中文' : '英文'}
+数据语言: ${locale === "zh-CN" ? "中文" : "英文"}
 数据数量: ${count}
-质量要求: ${quality === 'high' ? '高质量（真实业务数据）' : quality === 'fast' ? '快速生成' : '平衡质量和速度'}
+质量要求: ${
+      quality === "high"
+        ? "高质量（真实业务数据）"
+        : quality === "fast"
+        ? "快速生成"
+        : "平衡质量和速度"
+    }
 
 类型定义:
 ${properties}
@@ -99,13 +117,13 @@ ${properties}
         constraints.push(`max: ${prop.constraints.max}`);
       }
       if (prop.constraints.unique) {
-        constraints.push('unique');
+        constraints.push("unique");
       }
       if (prop.constraints.enum) {
-        constraints.push(`enum: [${prop.constraints.enum.join(', ')}]`);
+        constraints.push(`enum: [${prop.constraints.enum.join(", ")}]`);
       }
       if (constraints.length > 0) {
-        line += ` (${constraints.join(', ')})`;
+        line += ` (${constraints.join(", ")})`;
       }
     }
 
@@ -117,32 +135,17 @@ ${properties}
    */
   private async callAI(prompt: string): Promise<string> {
     try {
-      const response = await fetch(`${this.apiUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          temperature: 0.7,
-        }),
-      });
+      const messages = [
+        new SystemMessage(
+          "你是一个专业的 Mock 数据生成器，擅长生成真实、合理的测试数据。",
+        ),
+        new HumanMessage(prompt),
+      ];
 
-      if (!response.ok) {
-        throw new Error(`AI API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.choices[0].message.content;
+      const response = await this.llm.invoke(messages);
+      return response.content as string;
     } catch (error: any) {
-      console.error('Failed to call AI API:', error);
+      console.error("❌ AI API 调用失败:", error.message);
       throw error;
     }
   }
@@ -154,26 +157,26 @@ ${properties}
     try {
       // 移除 markdown 代码块标记
       let cleanedResponse = response.trim();
-      
+
       // 移除开头的 ```json 或 ```
-      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, '');
-      cleanedResponse = cleanedResponse.replace(/^```\s*/, '');
-      
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/i, "");
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, "");
+
       // 移除结尾的 ```
-      cleanedResponse = cleanedResponse.replace(/\s*```$/, '');
-      
+      cleanedResponse = cleanedResponse.replace(/\s*```$/, "");
+
       // 提取 JSON 部分（查找数组或对象）
       const jsonMatch = cleanedResponse.match(/(\[[\s\S]*\]|\{[\s\S]*\})/);
       if (!jsonMatch) {
-        throw new Error('No JSON array or object found in response');
+        throw new Error("No JSON array or object found in response");
       }
 
       const data = JSON.parse(jsonMatch[0]);
 
       return isArray ? data : data[0];
     } catch (error: any) {
-      console.error('Failed to parse AI response:', error);
-      console.error('Response:', response);
+      console.error("❌ 解析 AI 响应失败:", error.message);
+      console.error("响应内容:", response);
       throw error;
     }
   }
@@ -210,18 +213,18 @@ ${properties}
 
     // 根据类型生成
     switch (type) {
-      case 'number':
+      case "number":
         const min = constraints?.min ?? 0;
         const max = constraints?.max ?? 100;
         return Math.floor(Math.random() * (max - min + 1)) + min;
 
-      case 'string':
+      case "string":
         return `${prop.name}_${index + 1}`;
 
-      case 'boolean':
+      case "boolean":
         return Math.random() > 0.5;
 
-      case 'Date':
+      case "Date":
         return new Date().toISOString();
 
       default:

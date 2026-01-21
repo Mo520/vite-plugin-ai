@@ -11,6 +11,8 @@ export interface DiagnosticOptions {
   apiUrl: string;
   model: string;
   maxRetries: number;
+  temperature?: number;
+  maxTokens?: number;
 }
 
 export interface DiagnosticResult {
@@ -31,13 +33,15 @@ export class AIErrorDiagnostic {
       options.apiKey,
       options.apiUrl,
       options.model,
-      options.maxRetries
+      options.maxRetries,
+      options.temperature,
+      options.maxTokens,
     );
   }
 
   async diagnose(
     error: any,
-    autoFix: boolean = false
+    autoFix: boolean = false,
   ): Promise<DiagnosticResult> {
     if (!this.options.apiKey) {
       return {

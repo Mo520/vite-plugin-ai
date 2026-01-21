@@ -5,10 +5,9 @@ AI-powered diagnostic plugin for Vite. Automatically detect and fix build errors
 ## ✨ Features
 
 - 🔍 **Auto Detect** - Automatically detect build errors
-- 🤖 **AI Fix** - Use OpenAI to suggest fixes
-- 🔄 **Auto Retry** - Automatically retry with fixes
-- 📊 **Reports** - Generate diagnostic reports
-- 🎯 **Smart Analysis** - Understand error context
+- 🤖 **AI Analysis** - Use OpenAI to analyze errors and suggest fixes
+- 📊 **Reports** - Generate diagnostic reports (HTML, Markdown, JSON)
+- 🎯 **Smart Analysis** - Understand error context and provide actionable suggestions
 
 ## 📦 Installation
 
@@ -39,8 +38,6 @@ export default defineConfig({
   plugins: [
     vitePluginAIDiagnostic({
       apiKey: process.env.OPENAI_API_KEY,
-      autoFix: true,
-      maxRetries: 3,
       output: {
         console: true,
         html: true,

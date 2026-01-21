@@ -20,6 +20,8 @@ export interface ReviewerOptions {
   apiKey: string;
   apiUrl: string;
   model: string;
+  temperature?: number;
+  maxTokens?: number;
   level: "quick" | "standard" | "thorough";
   rules: {
     security?: string;
@@ -43,8 +45,8 @@ export class CodeReviewer {
         openAIApiKey: options.apiKey,
         configuration: { baseURL: options.apiUrl },
         modelName: options.model,
-        temperature: 0.2,
-        maxTokens: 4000,
+        temperature: options.temperature ?? 0.2,
+        maxTokens: options.maxTokens ?? 4000,
       });
     }
   }
@@ -86,7 +88,7 @@ export class CodeReviewer {
    */
   private async performReview(
     code: string,
-    filePath: string
+    filePath: string,
   ): Promise<ReviewIssue[]> {
     const systemPrompt = this.buildSystemPrompt();
     const userPrompt = this.buildUserPrompt(code, filePath);

@@ -2,11 +2,11 @@
  * AI Mock Generator - 类型定义
  */
 
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
-export type Locale = 'zh-CN' | 'en-US';
+export type Locale = "zh-CN" | "en-US";
 
-export type Quality = 'fast' | 'balanced' | 'high';
+export type Quality = "fast" | "balanced" | "high";
 
 /**
  * 插件配置选项
@@ -16,6 +16,8 @@ export interface MockGeneratorOptions {
   apiKey?: string;
   apiUrl?: string;
   model?: string;
+  temperature?: number;
+  maxTokens?: number;
 
   // 功能开关
   enabled?: boolean;
@@ -42,7 +44,7 @@ export interface MockGeneratorOptions {
   // 存储配置
   storage?: {
     dir?: string;
-    format?: 'json' | 'js' | 'ts';
+    format?: "json" | "js" | "ts";
     persist?: boolean;
     cache?: boolean;
   };

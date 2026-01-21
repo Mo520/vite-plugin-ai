@@ -94,6 +94,8 @@ export interface AnalyzerOptions {
   apiKey: string;
   apiUrl: string;
   model: string;
+  temperature?: number;
+  maxTokens?: number;
   threshold: {
     bundleSize?: number;
     totalSize?: number;

@@ -35,8 +35,8 @@ export class PerfAnalyzer {
         openAIApiKey: options.apiKey,
         configuration: { baseURL: options.apiUrl },
         modelName: options.model,
-        temperature: 0.2,
-        maxTokens: 4000,
+        temperature: options.temperature ?? 0.2,
+        maxTokens: options.maxTokens ?? 4000,
       });
     }
   }
@@ -66,7 +66,7 @@ export class PerfAnalyzer {
     const comparison = this.historyAnalyzer.compare(
       bundles,
       summary.totalSize,
-      summary.fileCount
+      summary.fileCount,
     );
 
     // 检测性能问题
@@ -79,7 +79,7 @@ export class PerfAnalyzer {
     console.log("💡 正在生成优化示例...");
     const optimizationExamples = this.examplesGenerator.generate(
       issues,
-      dependencies.duplicates
+      dependencies.duplicates,
     );
 
     // AI 分析（如果配置了 API Key）
@@ -91,7 +91,7 @@ export class PerfAnalyzer {
         summary,
         issues,
         dependencies,
-        comparison
+        comparison,
       );
     }
 
@@ -171,7 +171,7 @@ export class PerfAnalyzer {
     const totalSize = bundles.reduce((sum, b) => sum + b.size, 0);
     const totalGzipSize = bundles.reduce(
       (sum, b) => sum + (b.gzipSize || 0),
-      0
+      0,
     );
 
     // 按大小排序，取前 10
@@ -208,7 +208,7 @@ export class PerfAnalyzer {
       total: number;
       duplicates: DependencyInfo[];
       largest: DependencyInfo[];
-    }
+    },
   ): PerformanceIssue[] {
     const issues: PerformanceIssue[] = [];
     const { threshold } = this.options;
@@ -229,7 +229,7 @@ export class PerfAnalyzer {
 
     // 检查单个文件大小
     const largeBundles = bundles.filter(
-      (b) => b.size / 1024 > (threshold.bundleSize || 500)
+      (b) => b.size / 1024 > (threshold.bundleSize || 500),
     );
     if (largeBundles.length > 0) {
       issues.push({
@@ -238,7 +238,7 @@ export class PerfAnalyzer {
         title: "存在过大的单个文件",
         description: `发现 ${largeBundles.length} 个文件超过 ${threshold.bundleSize}KB`,
         files: largeBundles.map(
-          (b) => `${b.name} (${(b.size / 1024).toFixed(2)}KB)`
+          (b) => `${b.name} (${(b.size / 1024).toFixed(2)}KB)`,
         ),
         suggestion: "考虑拆分大文件，使用动态导入或代码分割",
       });
@@ -266,7 +266,7 @@ export class PerfAnalyzer {
         title: "存在未优化的图片",
         description: `发现 ${largeImages.length} 个大于 100KB 的图片`,
         files: largeImages.map(
-          (img) => `${img.name} (${(img.size / 1024).toFixed(2)}KB)`
+          (img) => `${img.name} (${(img.size / 1024).toFixed(2)}KB)`,
         ),
         suggestion: "使用图片压缩工具，或转换为 WebP 格式",
       });
@@ -281,7 +281,7 @@ export class PerfAnalyzer {
         severity: "low",
         title: "生产环境包含 sourcemap",
         description: `Sourcemap 文件占用 ${(totalMapSize / 1024 / 1024).toFixed(
-          2
+          2,
         )}MB`,
         suggestion: "生产环境建议禁用 sourcemap 或使用外部 sourcemap",
       });
@@ -299,7 +299,7 @@ export class PerfAnalyzer {
           (d) =>
             `${d.name} (被 ${d.usedBy.length} 个文件使用, ${(
               d.size / 1024
-            ).toFixed(2)}KB)`
+            ).toFixed(2)}KB)`,
         ),
         suggestion: "将重复依赖提取到公共 chunk 中",
       });
@@ -344,10 +344,10 @@ export class PerfAnalyzer {
       duplicates: DependencyInfo[];
       largest: DependencyInfo[];
     },
-    comparison?: any
+    comparison?: any,
   ): Promise<string> {
     const systemPrompt = new SystemMessage(
-      "你是一个专业的前端性能优化专家，精通 Vite、Webpack 等构建工具。请分析构建产物并提供专业的优化建议。"
+      "你是一个专业的前端性能优化专家，精通 Vite、Webpack 等构建工具。请分析构建产物并提供专业的优化建议。",
     );
 
     const bundlesSummary = summary.largestFiles
@@ -358,13 +358,13 @@ export class PerfAnalyzer {
     const typesSummary = Object.entries(summary.byType)
       .map(
         ([type, info]: [string, any]) =>
-          `- ${type}: ${info.count} 个文件, ${(info.size / 1024).toFixed(2)}KB`
+          `- ${type}: ${info.count} 个文件, ${(info.size / 1024).toFixed(2)}KB`,
       )
       .join("\n");
 
     const issuesSummary = issues
       .map(
-        (issue) => `- [${issue.severity}] ${issue.title}: ${issue.description}`
+        (issue) => `- [${issue.severity}] ${issue.title}: ${issue.description}`,
       )
       .join("\n");
 

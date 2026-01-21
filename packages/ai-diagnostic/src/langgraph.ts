@@ -26,7 +26,9 @@ export class DiagnosticGraph {
     apiKey: string,
     apiUrl: string,
     model: string = "gpt-4",
-    maxRetries: number = 3
+    maxRetries: number = 3,
+    temperature: number = 0.1,
+    maxTokens: number = 4000,
   ) {
     this.maxRetries = maxRetries;
 
@@ -41,8 +43,8 @@ export class DiagnosticGraph {
         baseURL: apiUrl,
       },
       modelName: model,
-      temperature: 0.1,
-      maxTokens: 4000,
+      temperature,
+      maxTokens,
     });
 
     this.graph = this.buildGraph();
@@ -88,12 +90,12 @@ export class DiagnosticGraph {
   }
 
   private async analyzeNode(
-    state: DiagnosticState
+    state: DiagnosticState,
   ): Promise<Partial<DiagnosticState>> {
     console.log("🔍 [LangGraph] 正在分析错误...");
 
     const systemPrompt = new SystemMessage(
-      "你是一个专业的前端代码诊断专家，精通 Vue3、TypeScript、Vite 和 uni-app。请简洁明了地分析问题。"
+      "你是一个专业的前端代码诊断专家，精通 Vue3、TypeScript、Vite 和 uni-app。请简洁明了地分析问题。",
     );
 
     const userPrompt = new HumanMessage(`
@@ -119,9 +121,46 @@ export class DiagnosticGraph {
   }
 
   private async suggestNode(
-    state: DiagnosticState
+    state: DiagnosticState,
   ): Promise<Partial<DiagnosticState>> {
     console.log("💡 [LangGraph] 正在生成修复建议...");
+
+    // 提取错误相关的代码片段
+    let codeContext = "";
+    if (state.error.code && state.error.message) {
+      // 尝试从错误信息中提取行号
+      const lineMatch = state.error.message.match(/\((\d+):(\d+)\)/);
+      if (lineMatch) {
+        const errorLine = parseInt(lineMatch[1]);
+        const lines = state.error.code.split("\n");
+
+        // 提取错误行前后各5行作为上下文
+        const startLine = Math.max(0, errorLine - 6);
+        const endLine = Math.min(lines.length, errorLine + 4);
+        const contextLines = lines.slice(startLine, endLine);
+
+        codeContext = `
+相关代码片段（第 ${startLine + 1}-${endLine} 行）：
+\`\`\`
+${contextLines
+  .map((line, idx) => {
+    const lineNum = startLine + idx + 1;
+    const marker = lineNum === errorLine ? " ← 错误位置" : "";
+    return `${lineNum}: ${line}${marker}`;
+  })
+  .join("\n")}
+\`\`\`
+`;
+      } else if (state.error.code.length < 2000) {
+        // 如果代码不长，显示完整代码
+        codeContext = `
+完整代码：
+\`\`\`
+${state.error.code}
+\`\`\`
+`;
+      }
+    }
 
     const userPrompt = new HumanMessage(`
 基于以下错误分析，请提供具体的修复建议：
@@ -134,13 +173,28 @@ ${state.analysis}
 - 信息: ${state.error.message}
 - 文件: ${state.error.file || "未知"}
 
-请简洁地提供：
-1. 具体的修复步骤（3-5步即可）
-2. 需要修改的代码位置（行号）
-3. 修改后的代码示例（只显示关键部分）
-4. 一句话预防建议
+${codeContext}
 
-注意：请直接给出建议，不要重复错误分析的内容。
+请提供精确的修复建议，格式如下：
+
+1. 修复步骤:
+   1. [具体步骤1]
+   2. [具体步骤2]
+   3. [具体步骤3]
+
+2. 需要修改的代码位置: [文件名] 的第 [X] 行
+
+3. 修改后的代码示例:
+   \`\`\`[语言]
+   [只显示需要修改的那几行代码，保持原有缩进]
+   \`\`\`
+
+4. 预防建议: [一句话说明如何避免类似错误]
+
+注意：
+- 代码示例必须基于实际的源代码，保持正确的语法和缩进
+- 只显示需要修改的关键代码行，不要显示整个文件
+- 确保修改后的代码可以直接使用
 `);
 
     const response = await this.llm.invoke([...state.messages, userPrompt]);
