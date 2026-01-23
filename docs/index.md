@@ -4,7 +4,7 @@ layout: home
 hero:
   name: AI Vite Plugins
   text: AI 驱动的 Vite 插件集合
-  tagline: 让开发更智能，让构建更高效
+  tagline: 让开发更智能，让构建更高效 🚀
   image:
     src: /logo.svg
     alt: AI Vite Plugins
