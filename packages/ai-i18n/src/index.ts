@@ -25,6 +25,8 @@ export interface I18nPluginOptions {
   // 扫描配置
   include?: string[];
   exclude?: string[];
+  extractMode?: "function-only" | "all"; // 提取模式：仅函数 | 全部中文
+  functionNames?: string[]; // 自定义函数名，默认 ['t', '$t']
   // 输出配置
   localesDir?: string;
   defaultLocale?: string;
@@ -43,6 +45,8 @@ export function vitePluginAII18n(options: I18nPluginOptions = {}): Plugin {
     maxTokens = 4000,
     include = ["src/**/*.vue", "src/**/*.ts"],
     exclude = ["node_modules/**", "dist/**"],
+    extractMode = "function-only",
+    functionNames = ["t", "$t"],
     localesDir = "src/locales",
     defaultLocale = "zh-CN",
     targetLocales = ["en-US"],
@@ -50,7 +54,12 @@ export function vitePluginAII18n(options: I18nPluginOptions = {}): Plugin {
     autoTranslate = true,
   } = options;
 
-  const scanner = new I18nScanner({ include, exclude });
+  const scanner = new I18nScanner({
+    include,
+    exclude,
+    extractMode,
+    functionNames,
+  });
   const translator = new I18nTranslator({
     apiKey,
     apiUrl,

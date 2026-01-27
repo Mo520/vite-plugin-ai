@@ -10,16 +10,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from "vue";
 
 // 测试 1: 导入不存在的模块 - 这会导致构建错误
-import { someFunction } from '@/utils/non-existent-file';
+import { someFunction } from "@/utils/non-existent-file";
 
-const message = ref('测试消息');
+const message = ref("测试消息");
 
 // 测试 2: 语法错误 - 缺少括号
 const handleClick = () => {
-  console.log('clicked'
+  console.log("clicked");
   // 缺少闭合括号，这是语法错误
 };
 

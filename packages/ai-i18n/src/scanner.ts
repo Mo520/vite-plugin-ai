@@ -10,6 +10,8 @@ export interface ScannerOptions {
   include: string[];
   exclude: string[];
   debug?: boolean; // 调试模式
+  extractMode?: "function-only" | "all"; // 提取模式：仅函数 | 全部中文
+  functionNames?: string[]; // 自定义函数名，默认 ['t', '$t']
 }
 
 export class I18nScanner {
@@ -27,7 +29,11 @@ export class I18nScanner {
   ];
 
   constructor(options: ScannerOptions) {
-    this.options = options;
+    this.options = {
+      ...options,
+      extractMode: options.extractMode || "function-only",
+      functionNames: options.functionNames || ["t", "$t"],
+    };
   }
 
   /**
@@ -77,7 +83,7 @@ export class I18nScanner {
 
     // 扫描 template 部分
     const templateMatch = content.match(
-      /<template[^>]*>([\s\S]*?)<\/template>/
+      /<template[^>]*>([\s\S]*?)<\/template>/,
     );
     if (templateMatch) {
       texts.push(...this.extractChineseFromTemplate(templateMatch[1]));
@@ -179,9 +185,32 @@ export class I18nScanner {
     // 移除注释
     let cleaned = template.replace(/<!--[\s\S]*?-->/g, "");
 
-    // 1. 提取 t() 或 $t() 函数中的文本（这些是需要翻译的 key）
-    const tFunctionRegex = /(?:\$t|\bt)\s*\(\s*["']([^"']+)["']\s*\)/g;
+    // 构建函数匹配正则
+    const functionNames = this.options.functionNames!;
+    const escapedNames = functionNames.map((name) =>
+      name.replace(/\$/g, "\\$"),
+    );
+    const pattern = `(?:${escapedNames.join(
+      "|",
+    )})\\s*\\(\\s*["']([^"']+)["']\\s*(?:,[\\s\\S]*?)?\\)`;
+    const tFunctionRegex = new RegExp(pattern, "g");
+
+    // 模式1：只提取函数中的文本（默认）
+    if (this.options.extractMode === "function-only") {
+      let match;
+      while ((match = tFunctionRegex.exec(cleaned)) !== null) {
+        const text = match[1];
+        if (/[\u4e00-\u9fa5]/.test(text)) {
+          texts.push(text);
+        }
+      }
+      return texts;
+    }
+
+    // 模式2：提取所有中文（兼容旧版本）
     let match;
+
+    // 1. 提取函数中的文本
     while ((match = tFunctionRegex.exec(cleaned)) !== null) {
       const text = match[1];
       if (/[\u4e00-\u9fa5]/.test(text)) {
@@ -189,7 +218,7 @@ export class I18nScanner {
       }
     }
 
-    // 2. 提取标签内的纯文本（不包含插值表达式）
+    // 2. 提取标签内的纯文本
     const tagTextRegex = />([^<{]+)</g;
     while ((match = tagTextRegex.exec(cleaned)) !== null) {
       const text = match[1].trim();
@@ -198,7 +227,7 @@ export class I18nScanner {
       }
     }
 
-    // 3. 提取插值中的字符串字面量（不包括 t() 调用）
+    // 3. 提取插值中的字符串字面量
     const interpolationRegex = /\{\{\s*["']([^"']+)["']\s*\}\}/g;
     while ((match = interpolationRegex.exec(cleaned)) !== null) {
       const text = match[1];
@@ -226,9 +255,32 @@ export class I18nScanner {
     // 安全地移除注释
     const cleaned = this.removeComments(script);
 
-    // 1. 提取 t() 函数中的文本（这些是需要翻译的 key）
-    const tFunctionRegex = /\bt\s*\(\s*["']([^"']+)["']\s*\)/g;
+    // 构建函数匹配正则
+    const functionNames = this.options.functionNames!;
+    const escapedNames = functionNames.map((name) =>
+      name.replace(/\$/g, "\\$"),
+    );
+    const pattern = `(?:this\\.)?(?:${escapedNames.join(
+      "|",
+    )})\\s*\\(\\s*["']([^"']+)["']\\s*(?:,[\\s\\S]*?)?\\)`;
+    const tFunctionRegex = new RegExp(pattern, "g");
+
+    // 模式1：只提取函数中的文本（默认）
+    if (this.options.extractMode === "function-only") {
+      let match;
+      while ((match = tFunctionRegex.exec(cleaned)) !== null) {
+        const text = match[1];
+        if (/[\u4e00-\u9fa5]/.test(text)) {
+          texts.push(text);
+        }
+      }
+      return texts;
+    }
+
+    // 模式2：提取所有中文（兼容旧版本）
     let match;
+
+    // 1. 提取函数中的文本
     while ((match = tFunctionRegex.exec(cleaned)) !== null) {
       const text = match[1];
       if (/[\u4e00-\u9fa5]/.test(text)) {
@@ -236,7 +288,7 @@ export class I18nScanner {
       }
     }
 
-    // 2. 提取所有字符串字面量（不在 t() 中的）
+    // 2. 提取所有字符串字面量
     const allStrings: string[] = [];
 
     // 单引号字符串
@@ -251,7 +303,7 @@ export class I18nScanner {
       allStrings.push(match[1]);
     }
 
-    // 模板字符串（简单情况，不包含插值）
+    // 模板字符串
     const templateRegex = /`([^`$\\]*(\\.[^`$\\]*)*)`/g;
     while ((match = templateRegex.exec(cleaned)) !== null) {
       allStrings.push(match[1]);
@@ -304,7 +356,7 @@ export class I18nScanner {
     // 4. 过滤技术术语
     if (
       /\.(json|js|ts|vue|md|txt|html|css|jsx|tsx)\s*(文件|不存在|已|错误)/.test(
-        text
+        text,
       )
     ) {
       if (debug) console.log(`[过滤] "${text}" - 原因: 技术术语`);
@@ -350,9 +402,7 @@ export class I18nScanner {
     }
 
     // 8. 过滤代码片段
-    if (
-      /^(const|let|var|function|class|import|export|return)\s/.test(text)
-    ) {
+    if (/^(const|let|var|function|class|import|export|return)\s/.test(text)) {
       if (debug) console.log(`[过滤] "${text}" - 原因: 代码片段`);
       return false;
     }
@@ -369,7 +419,9 @@ export class I18nScanner {
     ).length;
     if (specialCharCount > text.length * 0.3) {
       if (debug)
-        console.log(`[过滤] "${text}" - 原因: 特殊字符过多 (${specialCharCount})`);
+        console.log(
+          `[过滤] "${text}" - 原因: 特殊字符过多 (${specialCharCount})`,
+        );
       return false;
     }
 

@@ -29,21 +29,15 @@ export class GitUtils {
       console.log(`🔍 [Git] 检测到 ${changedFiles.length} 个变更文件`);
       changedFiles.forEach((f) => console.log(`   - ${f}`));
 
-      // 过滤存在的文件，并处理路径
-      const existingFiles = changedFiles
-        .map((file) => {
-          // 移除可能的前缀路径（如 ai-uni-app/）
-          const cleanFile = file.replace(/^[^/]+\//, "");
-          return cleanFile;
-        })
-        .filter((file) => {
-          const fullPath = path.resolve(process.cwd(), file);
-          const exists = fs.existsSync(fullPath);
-          if (!exists) {
-            console.log(`   ⚠️  文件不存在: ${fullPath}`);
-          }
-          return exists;
-        });
+      // 过滤存在的文件
+      const existingFiles = changedFiles.filter((file) => {
+        const fullPath = path.resolve(process.cwd(), file);
+        const exists = fs.existsSync(fullPath);
+        if (!exists) {
+          console.warn(`⚠️  文件不存在: ${fullPath}`);
+        }
+        return exists;
+      });
 
       console.log(`🔍 [Git] 过滤后文件: ${existingFiles.length} 个`);
       existingFiles.forEach((f) => console.log(`   ✓ ${f}`));
@@ -110,7 +104,7 @@ export class GitUtils {
         {
           encoding: "utf-8",
           cwd: process.cwd(),
-        }
+        },
       );
 
       return output

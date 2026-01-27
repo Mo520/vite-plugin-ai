@@ -47,7 +47,16 @@ export class CodeReviewer {
         modelName: options.model,
         temperature: options.temperature ?? 0.2,
         maxTokens: options.maxTokens ?? 4000,
+        topP: undefined, // 避免与 temperature 冲突
       });
+
+      // 覆盖 invocationParams 方法，移除 top_p 参数（兼容 Claude 等模型）
+      const originalInvocationParams = this.llm.invocationParams.bind(this.llm);
+      this.llm.invocationParams = (options: any) => {
+        const params = originalInvocationParams(options);
+        delete params.top_p;
+        return params;
+      };
     }
   }
 

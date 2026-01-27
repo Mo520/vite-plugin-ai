@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-ai-code-review",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "AI-powered code review plugin for Vite - Automatically review code quality, security, and best practices",
   "keywords": [
     "vite-plugin-ai-code-review",

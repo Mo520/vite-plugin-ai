@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-ai-perf-analyzer",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "AI-powered performance analyzer for Vite - Analyze bundle size and suggest optimizations",
   "keywords": [
     "vite-plugin-ai-perf-analyzer",

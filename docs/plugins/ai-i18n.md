@@ -44,10 +44,16 @@ export default defineConfig({
       temperature: 0.3, // 翻译灵活性（0-2，越高越自然）
       maxTokens: 4000, // 最大 token 数
 
-      // 功能配置
+      // 扫描配置
+      extractMode: "function-only", // 'function-only' | 'all'
+      functionNames: ["t", "$t"], // 自定义函数名
+
+      // 输出配置
       localesDir: "src/locales",
       defaultLocale: "zh-CN",
       targetLocales: ["en-US"],
+
+      // 功能开关
       autoScan: true,
       autoTranslate: true,
     }),
@@ -69,10 +75,12 @@ export default defineConfig({
 
 ### 扫描配置
 
-| 选项      | 类型       | 默认值                            | 说明       |
-| --------- | ---------- | --------------------------------- | ---------- |
-| `include` | `string[]` | `['src/**/*.vue', 'src/**/*.ts']` | 包含的文件 |
-| `exclude` | `string[]` | `['node_modules/**', 'dist/**']`  | 排除的文件 |
+| 选项            | 类型                       | 默认值                            | 说明                                                             |
+| --------------- | -------------------------- | --------------------------------- | ---------------------------------------------------------------- |
+| `include`       | `string[]`                 | `['src/**/*.vue', 'src/**/*.ts']` | 包含的文件                                                       |
+| `exclude`       | `string[]`                 | `['node_modules/**', 'dist/**']`  | 排除的文件                                                       |
+| `extractMode`   | `'function-only' \| 'all'` | `'function-only'`                 | 提取模式：`function-only` 只提取函数中的文本，`all` 提取所有中文 |
+| `functionNames` | `string[]`                 | `['t', '$t']`                     | 自定义国际化函数名（仅在 `function-only` 模式下生效）            |
 
 ### 输出配置
 
@@ -91,24 +99,49 @@ export default defineConfig({
 
 ## 使用示例
 
-### 1. 基础使用
+### 1. 基础使用（推荐）
 
-在 Vue 组件中使用中文：
+使用 `function-only` 模式（默认），只提取 `t()` 或 `$t()` 函数中的文本：
 
 ```vue
 <template>
   <div>
-    <h1>欢迎使用 AI Vite Plugins</h1>
-    <p>这是一个示例页面</p>
+    <h1>{{ $t("欢迎使用 AI Vite Plugins") }}</h1>
+    <p>{{ $t("这是一个示例页面") }}</p>
   </div>
 </template>
 ```
 
 插件会自动：
 
-1. 扫描到 "欢迎使用 AI Vite Plugins" 和 "这是一个示例页面"
+1. 扫描到 `$t()` 函数中的 "欢迎使用 AI Vite Plugins" 和 "这是一个示例页面"
 2. 生成 `src/locales/zh-CN.json`
 3. 使用 AI 翻译到 `src/locales/en-US.json`
+
+**注意**：在 `function-only` 模式下，直接写在模板中的中文（如 `<h1>欢迎</h1>`）不会被提取。
+
+### 1.1 提取所有中文（兼容模式）
+
+如果你想提取所有中文字符串（包括未使用 `t()` 包裹的），可以使用 `all` 模式：
+
+```typescript
+vitePluginAII18n({
+  extractMode: "all", // 提取所有中文
+});
+```
+
+```vue
+<template>
+  <div>
+    <h1>欢迎使用 AI Vite Plugins</h1>
+    <!-- ✅ 会被提取 -->
+    <p>{{ $t("这是一个示例页面") }}</p>
+    <!-- ✅ 会被提取 -->
+  </div>
+</template>
+```
+
+**警告**：`all` 模式可能会提取到不该提取的内容（如正则表达式、代码片段等），建议使用 `function-only` 模式。
 
 ### 2. 配合 vue-i18n 使用
 
@@ -178,12 +211,43 @@ vitePluginAII18n({
 });
 ```
 
+### 6. 自定义函数名
+
+如果你的项目使用自定义的国际化函数名，可以配置 `functionNames`：
+
+```typescript
+vitePluginAII18n({
+  extractMode: "function-only",
+  functionNames: ["t", "$t", "i18n.t", "$translate"], // 支持多种函数名
+});
+```
+
+```vue
+<template>
+  <div>
+    <h1>{{ $translate("欢迎") }}</h1>
+    <!-- ✅ 会被提取 -->
+    <p>{{ i18n.t("示例") }}</p>
+    <!-- ✅ 会被提取 -->
+  </div>
+</template>
+```
+
 ## 工作原理
 
 ### 扫描阶段
 
-1. 使用正则表达式匹配中文字符
-2. 过滤掉注释、代码片段
+**`function-only` 模式（默认）**：
+
+1. 使用正则表达式匹配 `t()` 或 `$t()` 函数调用
+2. 提取函数参数中的中文文本
+3. 过滤掉注释、代码片段
+4. 去重并生成 key-value 对
+
+**`all` 模式**：
+
+1. 使用正则表达式匹配所有中文字符
+2. 过滤掉注释、代码片段、正则表达式等
 3. 去重并生成 key-value 对
 
 ### 翻译阶段
@@ -258,7 +322,37 @@ include: ['src/**/*.vue', 'src/**/*.tsx'],
 exclude: ['src/test/**', 'src/**/*.spec.ts']
 ```
 
-### 4. API 调用次数会很多吗？
+### 4. 为什么有些中文没有被提取？
+
+如果你使用的是 `function-only` 模式（默认），只有 `t()` 或 `$t()` 函数中的文本会被提取。
+
+```vue
+<!-- ❌ 不会被提取 -->
+<h1>欢迎</h1>
+
+<!-- ✅ 会被提取 -->
+<h1>{{ $t('欢迎') }}</h1>
+```
+
+如果你想提取所有中文，可以使用 `all` 模式：
+
+```typescript
+vitePluginAII18n({
+  extractMode: "all",
+});
+```
+
+### 5. 扫描到了不该提取的内容怎么办？
+
+如果你使用 `all` 模式，可能会提取到正则表达式、代码片段等。建议切换到 `function-only` 模式：
+
+```typescript
+vitePluginAII18n({
+  extractMode: "function-only", // 只提取 t() 函数中的文本
+});
+```
+
+### 6. API 调用次数会很多吗？
 
 不会。插件会：
 

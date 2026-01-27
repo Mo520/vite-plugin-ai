@@ -37,7 +37,8 @@ export class DiagnosticGraph {
     console.log("📝 [配置] API URL:", apiUrl);
     console.log("📝 [配置] API Key:", apiKey ? "已配置" : "未配置");
 
-    this.llm = new ChatOpenAI({
+    // 创建配置对象，不包含 top_p（避免与 Claude 等模型冲突）
+    const llmConfig: any = {
       openAIApiKey: apiKey,
       configuration: {
         baseURL: apiUrl,
@@ -45,7 +46,18 @@ export class DiagnosticGraph {
       modelName: model,
       temperature,
       maxTokens,
-    });
+    };
+
+    this.llm = new ChatOpenAI(llmConfig);
+
+    // 覆盖 invocationParams 方法，移除 top_p 参数
+    // 这是为了兼容 Claude 等不支持同时使用 temperature 和 top_p 的模型
+    const originalInvocationParams = this.llm.invocationParams.bind(this.llm);
+    this.llm.invocationParams = (options: any) => {
+      const params = originalInvocationParams(options);
+      delete params.top_p;
+      return params;
+    };
 
     this.graph = this.buildGraph();
   }

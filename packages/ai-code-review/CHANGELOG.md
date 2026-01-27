@@ -1,5 +1,45 @@
 # vite-plugin-ai-code-review
 
+## 1.2.2
+
+### Patch Changes
+
+- fix: correct file path handling in git-utils
+
+  Remove incorrect path prefix removal that was causing file paths to be truncated.
+  Now correctly preserves the full relative path from git (e.g., `src/components/...` instead of `components/...`).
+
+  **Before:**
+
+  - `src/components/File.vue` → `components/File.vue` ❌
+
+  **After:**
+
+  - `src/components/File.vue` → `src/components/File.vue` ✅
+
+## 1.2.1
+
+### Patch Changes
+
+- fix: add Claude model compatibility by removing top_p parameter
+
+  Fix compatibility issue with Claude and other models that don't support using both `temperature` and `top_p` parameters simultaneously.
+
+  **Changes:**
+
+  - Override `invocationParams` method to remove `top_p` parameter
+  - Prevents "400 temperature and top_p cannot both be specified" error
+  - Maintains compatibility with OpenAI models
+
+  **Supported Models:**
+
+  - ✅ OpenAI (gpt-4, gpt-3.5-turbo, etc.)
+  - ✅ Claude (claude-3-opus, claude-3-sonnet, claude-haiku-4-5, etc.)
+  - ✅ Any OpenAI-compatible API
+
+  **Technical Details:**
+  LangChain's ChatOpenAI class defaults to setting `top_p: 1`. This fix removes the parameter before sending to the API, allowing models like Claude to work correctly with the `temperature` parameter.
+
 ## 1.2.0
 
 ### Minor Changes
